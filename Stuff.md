@@ -1,6 +1,6 @@
 # flutter_application_1
 
-A new Flutter project.
+A new Flutter project. Main code is in lib folder
 
 ## Getting Started
 
