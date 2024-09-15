@@ -1,0 +1,1 @@
+# The Main code is found in the lib Folder which contains the main.dart file and component files
