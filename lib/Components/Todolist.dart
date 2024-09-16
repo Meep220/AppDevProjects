@@ -18,6 +18,13 @@ class Todolist extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text('  Tasks', style: TextStyle(fontWeight: FontWeight.bold)),
+                    TextButton(
+                      onPressed: () {
+                        Provider.of<TodoList>(context, listen: false)
+                            .completeAllTasks();
+                      },
+                      child: Text('Check All'),
+                    ),
                   ],
                 ),
                 Expanded(
@@ -34,6 +41,55 @@ class Todolist extends StatelessWidget {
                               icon: Icon(Icons.check),
                               onPressed: () {
                                 todoList.completeTask(index);
+                              },
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Divider(),
+          Expanded(
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('  Completed Tasks',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    TextButton(
+                      onPressed: () {
+                        Provider.of<TodoList>(context, listen: false)
+                            .uncompleteAllTasks();
+                      },
+                      child: Text('Uncheck All'),
+                    ),
+                  ],
+                ),
+                Expanded(
+                  child: Consumer<TodoList>(
+                    builder: (context, todoList, child) {
+                      return ListView.builder(
+                        itemCount: todoList.completedTasks.length,
+                        itemBuilder: (context, index) {
+                          final completedTask = todoList.completedTasks[index];
+                          return ListTile(
+                            leading: Text('${completedTask.number}.'),  // Same permanent number
+                            title: Text(
+                              completedTask.description,
+                              style: TextStyle(
+                                decoration: TextDecoration.lineThrough,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            trailing: IconButton(
+                              icon: Icon(Icons.check_box),
+                              onPressed: () {
+                                todoList.uncompleteTask(index);
                               },
                             ),
                           );
@@ -89,6 +145,8 @@ class _AddTaskWidgetState extends State<AddTaskWidget> {
     );
   }
 }
+
+
 class Task {
   final int number;  // Permanent task number
   final String description;
@@ -104,15 +162,49 @@ class TodoList extends ChangeNotifier {
   List<Task> get tasks => _tasks;
   List<Task> get completedTasks => _completedTasks;
 
+  // Adding a task with a permanent number
   void addTask(String description) {
     _tasks.add(Task(_taskCounter, description));
     _taskCounter++;
+    _sortTasks();  // Sort tasks by number after adding
     notifyListeners();
   }
 
-
+  // Completing a task and sorting both lists
   void completeTask(int index) {
-    print("Clicked");
+    Task completedTask = _tasks.removeAt(index);
+    _completedTasks.add(completedTask);
+    _sortTasks();  // Sort both to-do and completed tasks after moving
     notifyListeners();
+  }
+
+  // Uncompleting a task and sorting both lists
+  void uncompleteTask(int index) {
+    Task uncompletedTask = _completedTasks.removeAt(index);
+    _tasks.add(uncompletedTask);
+    _sortTasks();  // Sort both to-do and completed tasks after moving
+    notifyListeners();
+  }
+
+  // Mass complete all tasks
+  void completeAllTasks() {
+    _completedTasks.addAll(_tasks);
+    _tasks.clear();
+    _sortTasks();
+    notifyListeners();
+  }
+
+  // Mass uncomplete all tasks
+  void uncompleteAllTasks() {
+    _tasks.addAll(_completedTasks);
+    _completedTasks.clear();
+    _sortTasks();
+    notifyListeners();
+  }
+
+  // Sorting tasks by their permanent task number
+  void _sortTasks() {
+    _tasks.sort((a, b) => a.number.compareTo(b.number));  // Sort by task number
+    _completedTasks.sort((a, b) => a.number.compareTo(b.number));  // Sort completed tasks by number
   }
 }
