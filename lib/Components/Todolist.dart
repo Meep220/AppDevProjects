@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import '../Components/TaskNode.dart';
-
+import 'package:provider/provider.dart';
 class Todolist extends StatelessWidget {
   const Todolist({super.key});
 
@@ -9,39 +8,111 @@ class Todolist extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('To Do List'),
-        leading: 
-          IconButton(
-            onPressed: (){},
-             icon: const Icon(Icons.add,color: Colors.black,),
-             tooltip: "Add Task",
-            )
-        ,
       ),
-      body: Container(
-        margin: EdgeInsets.all(10),
-        padding: EdgeInsets.all(10),
-        child: Column(
-          children: [
-            Expanded(child: ListView(
+      body: Column(
+        children: <Widget>[
+          Expanded(
+            child: Column(
               children: [
-                ListTile(
-                  leading: Text("Item No."),
-                  title: Text("Task"),
-                  
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('  Tasks', style: TextStyle(fontWeight: FontWeight.bold)),
+                  ],
                 ),
-                TaskNode("Clean the Dishes",1),
-                TaskNode("Clean the floor",2),
-                TaskNode("Clean the cat",3),
-                TaskNode("Clean the ",4),
-                TaskNode("Clean the Dishes",5),
+                Expanded(
+                  child: Consumer<TodoList>(
+                    builder: (context, todoList, child) {
+                      return ListView.builder(
+                        itemCount: todoList.tasks.length,
+                        itemBuilder: (context, index) {
+                          final task = todoList.tasks[index];
+                          return ListTile(
+                            leading: Text('${task.number}.'),  // Permanent task number
+                            title: Text(task.description),
+                            trailing: IconButton(
+                              icon: Icon(Icons.check),
+                              onPressed: () {
+                                todoList.completeTask(index);
+                              },
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
               ],
-              
             ),
-            ),
-          ],
-        ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: AddTaskWidget(),
+          ),
+        ],
       ),
     );
   }
 }
 
+class AddTaskWidget extends StatefulWidget {
+  @override
+  _AddTaskWidgetState createState() => _AddTaskWidgetState();
+}
+
+class _AddTaskWidgetState extends State<AddTaskWidget> {
+  final _controller = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: <Widget>[
+        Expanded(
+          child: TextField(
+            controller: _controller,
+            decoration: InputDecoration(
+              hintText: 'Enter task here',
+            ),
+          ),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            if (_controller.text.isNotEmpty) {
+              Provider.of<TodoList>(context, listen: false)
+                  .addTask(_controller.text);
+              _controller.clear();
+            }
+          },
+          child: Text('Add'),
+        ),
+      ],
+    );
+  }
+}
+class Task {
+  final int number;  // Permanent task number
+  final String description;
+
+  Task(this.number, this.description);
+}
+
+class TodoList extends ChangeNotifier {
+  List<Task> _tasks = [];
+  List<Task> _completedTasks = [];
+  int _taskCounter = 1;  // Counter to assign permanent task numbers
+
+  List<Task> get tasks => _tasks;
+  List<Task> get completedTasks => _completedTasks;
+
+  void addTask(String description) {
+    _tasks.add(Task(_taskCounter, description));
+    _taskCounter++;
+    notifyListeners();
+  }
+
+
+  void completeTask(int index) {
+    print("Clicked");
+    notifyListeners();
+  }
+}
