@@ -31,10 +31,12 @@ class Todolist extends StatelessWidget {
                             leading: Text('${task.number}.'),  // Permanent task number
                             title: Text(task.description),
                             trailing: IconButton(
-                              icon: Icon(Icons.check),
+                              icon: Icon(Icons.check_box_outline_blank),
                               onPressed: () {
                                 todoList.completeTask(index);
+                                
                               },
+                              tooltip: "Add Task Here",
                             ),
                           );
                         },
@@ -46,7 +48,7 @@ class Todolist extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(20.0),
             child: AddTaskWidget(),
           ),
         ],
