@@ -33,9 +33,12 @@ class _TaskNodeState extends State<TaskNode> {
         textColor: Colors.black,
         trailing: IconButton(
           onPressed: (){
-            print("task Toggled");
+            setState(() {
+              completed = (completed == false)? true:false;
+              print("The State is : ${completed}");
+            });
           },
-         icon: Icon(Icons.check_circle)
+         icon: (completed == false)?Icon(Icons.check_box_outline_blank):Icon(Icons.check_box)  
          ), 
         ),
       );
